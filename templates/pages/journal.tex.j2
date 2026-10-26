@@ -1,0 +1,6 @@
+%# The journal page that follows each day: ruled lines filling the page.
+\BeginPage{\VAR{ day.month_id }}{2}{Journal}{bm-journal-\VAR{ day.id }}%
+\PageHeader{journal-\VAR{ day.id }}{Journal \textnormal{--} \VAR{ day.title }}{\hyperlink{day-\VAR{ day.id }}{Day}}%
+\JournalRowH=\dimexpr\BodyH*999/1000/\VAR{ cfg.journal_lines }\relax
+\vbox to \BodyH{%
+\leaders\vbox to \JournalRowH{\vss\hbox to\linewidth{\color{rule}\hrulefill}}\vfil}

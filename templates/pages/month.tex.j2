@@ -1,0 +1,26 @@
+%# One month: a 7-column grid. Each cell is a link to that day's page.
+\BeginPage{\VAR{ month.id }}{0}{\VAR{ month.title }}{bm-month-\VAR{ month.id }}%
+\PageHeader{month-\VAR{ month.id }}{\VAR{ month.title }}{}%
+%# The cell height depends on the number of weeks, so the grid always fills the page.
+\MonthCellW=\dimexpr(\textwidth-8\RuleW)/7\relax
+\MonthHeadH=0.03\textheight
+\MonthCellH=\dimexpr(\BodyH-\MonthHeadH)*99/100/\VAR{ month.weeks|length }\relax
+\MonthLine
+\hbox{\MonthVRule%
+%% for name in planner.weekday_names
+\MonthHead{\VAR{ name }}\MonthVRule%
+%% endfor
+}\nointerlineskip
+%% for week in month.weeks
+\MonthLine
+\hbox{\MonthVRule%
+%% for day in week
+%% if day
+\MonthCell{\VAR{ day.id }}{\VAR{ day.num }}\MonthVRule%
+%% else
+\MonthBlank\MonthVRule%
+%% endif
+%% endfor
+}\nointerlineskip
+%% endfor
+\MonthLine

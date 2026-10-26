@@ -1,0 +1,26 @@
+%# The wrapper around every page: paper size, margins, the tab strip, then \VAR{ body }.
+\documentclass[10pt]{article}
+\usepackage[paperwidth=\VAR{ cfg.width_mm }mm,paperheight=\VAR{ cfg.height_mm }mm,%
+  left=\VAR{ cfg.margin_left_pct|frac }\paperwidth,%
+  right=\VAR{ (cfg.tab_width_pct + cfg.tab_gap_pct)|frac }\paperwidth,%
+  top=\VAR{ cfg.margin_top_pct|frac }\paperheight,%
+  bottom=\VAR{ cfg.margin_bottom_pct|frac }\paperheight]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}      % scalable fonts: any size, no substitutions
+\usepackage{planner}      % the layout pieces (tex/planner.sty)
+\hypersetup{pdftitle={Academic Planner \VAR{ planner.title }}}
+
+%# The tab strip: one tab for the year, one per month.
+\setlength{\PlannerTabW}{\VAR{ cfg.tab_width_pct|frac }\paperwidth}
+\setlength{\PlannerTabTop}{\VAR{ cfg.margin_top_pct|frac }\paperheight}
+\PlannerTabCount=\VAR{ planner.months|length + 1 }
+\renewcommand{\PlannerTabsDefinition}{%
+\Tab{year}{YEAR}{year}%
+%% for month in planner.months
+\Tab{\VAR{ month.id }}{\VAR{ month.label }}{month-\VAR{ month.id }}%
+%% endfor
+}
+
+\begin{document}
+\VAR{ body }
+\end{document}

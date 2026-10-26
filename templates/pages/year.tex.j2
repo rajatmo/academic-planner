@@ -1,0 +1,45 @@
+%# The year page: mini calendars, three per row. Every date links to its day page.
+\BeginPage{year}{0}{\VAR{ planner.title }}{bm-year}%
+\PageHeader{year}{\VAR{ planner.title }}{}%
+%# Sizes, as fractions of the text area, so the grid fills the page.
+\MiniColGap=0.03\textwidth
+\MiniCellW=\dimexpr(\textwidth-2\MiniColGap)/21\relax
+\MiniRowGap=0.02\textheight
+\MiniTitleH=0.03\textheight
+\MiniMonthH=\dimexpr(\BodyH-3\MiniRowGap)*99/100/\VAR{ planner.months|batch(3)|list|length }\relax
+\MiniRowH=\dimexpr(\MiniMonthH-\MiniTitleH)/7\relax
+\MiniRowDepth=0.3\MiniRowH
+
+%# One mini calendar: the month name (a link), the weekday letters, then the weeks.
+%% macro mini_month(month)
+\parbox[t][\MiniMonthH][t]{\dimexpr7\MiniCellW\relax}{%
+\vbox to \MiniTitleH{\hbox{\hyperlink{month-\VAR{ month.id }}{\bfseries\color{accent}\VAR{ month.name }}}\vss}%
+\nointerlineskip\small
+\hbox{%
+%% for initial in planner.weekday_initials
+\MiniHead{\VAR{ initial }}%
+%% endfor
+}\nointerlineskip
+%% for week in month.weeks
+\hbox{%
+%% for day in week
+%% if day
+\MiniDay{\VAR{ day.id }}{\VAR{ day.num }}%
+%% else
+\MiniBlank%
+%% endif
+%% endfor
+}\nointerlineskip
+%% endfor
+}%
+%% endmacro
+%% for row in planner.months|batch(3)
+\hbox{%
+%% for month in row
+\VAR{ mini_month(month) }%
+%% if not loop.last
+\hskip\MiniColGap%
+%% endif
+%% endfor
+}\nointerlineskip\vskip\MiniRowGap
+%% endfor

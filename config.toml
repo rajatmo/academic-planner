@@ -1,0 +1,27 @@
+# Planner settings. Edit these, then run:  python build.py
+
+[paper]
+# Samsung Galaxy Tab S10+: 12.4" display, 16:10 (2800x1752 px) = about 267 x 167 mm, portrait.
+width_mm  = 167
+height_mm = 267
+
+[layout]
+# Percentages of the page, so any paper size fills edge to edge.
+margin_left_pct   = 3.5
+margin_top_pct    = 2.5
+margin_bottom_pct = 2.5
+tab_width_pct     = 3.5   # width of the right-edge tab strip
+tab_gap_pct       = 1.5   # space between the content and the tab strip
+
+[calendar]
+start      = "2026-08"    # first month (YYYY-MM)
+months     = 12           # how many months to include
+week_start = "monday"     # "monday" or "sunday"
+
+[day]
+schedule_start = 5        # first hour of the schedule (24h clock)
+schedule_end   = 22       # last hour
+task_rows      = 18       # rows in the task list
+
+[journal]
+lines = 26                # ruled lines on each journal page

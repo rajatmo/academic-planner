@@ -1,0 +1,35 @@
+%# One week: seven blocks, each titled with a link to that day's page.
+%# Days outside the planner (first and last week) are greyed out and not linked.
+\BeginPage{\VAR{ week.month_id }}{1}{Week: \VAR{ week.title }}{bm-week-\VAR{ week.id }}%
+\PageHeader{week-\VAR{ week.id }}{\VAR{ week.title }}{%
+\hyperlink{month-\VAR{ week.month_id }}{Month}\quad%
+%% if week.prev_id
+\hyperlink{week-\VAR{ week.prev_id }}{$\langle$\,Prev week}%
+%% endif
+\quad%
+%% if week.next_id
+\hyperlink{week-\VAR{ week.next_id }}{Next week\,$\rangle$}%
+%% endif
+}%
+%% set lines = 3
+\WeekGapH=0.02\textheight
+\WeekLabelH=0.03\textheight
+\WeekBlockH=\dimexpr(\BodyH*99/100-7\WeekGapH)/7\relax
+\WeekLineH=\dimexpr(\WeekBlockH-\WeekLabelH)/\VAR{ lines }\relax
+%% for day in week.days
+\vbox to \WeekBlockH{%
+\vbox to \WeekLabelH{%
+\hbox to\linewidth{\strut%
+%% if day.id
+\hyperlink{day-\VAR{ day.id }}{\bfseries\color{accent}\VAR{ day.weekday }\quad \VAR{ day.num }}%
+%% else
+{\color{muted}\bfseries \VAR{ day.weekday }\quad \VAR{ day.num }}%
+%% endif
+\hfil}%
+\kern2pt{\color{accent}\hrule height 0.6pt}\vss}%
+%% for n in range(lines)
+\FormRow{}{\WeekLineH}%
+%% endfor
+\vss}%
+\nointerlineskip\vskip\WeekGapH
+%% endfor

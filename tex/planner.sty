@@ -1,0 +1,138 @@
+% planner.sty -- reusable pieces. No dates and no page structure: the Jinja templates
+% in templates/pages/ decide what goes on each page and call these.
+%
+% All sizes are fractions of the text area (\textwidth / \textheight), which geometry
+% sets from the page size and margin percentages. Change the paper size and every
+% page rescales to fill it.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{planner}[2026/10/26 Planner layout primitives]
+
+\RequirePackage{xcolor}     % colours
+\RequirePackage{graphicx}   % \rotatebox for the tab labels
+\RequirePackage{etoolbox}   % \ifdefstring
+\RequirePackage{eso-pic}    % draw on every page at shipout (the tab strip)
+\RequirePackage[hidelinks]{hyperref}
+
+% ---------- Look ----------
+\definecolor{accent}{HTML}{2F4F9E}
+\definecolor{muted}{HTML}{8A8F98}
+\definecolor{tabidle}{HTML}{E4E6EA}
+\definecolor{rule}{HTML}{C8CCD2}
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\newdimen\RuleW \RuleW=0.4pt                     % thickness of thin rules
+
+% ---------- Sizes shared by all pages ----------
+\newdimen\HeaderH \newdimen\BodyH \newdimen\SectionHeadH
+\AtBeginDocument{%
+  \HeaderH=0.045\textheight                          % page title strip
+  \BodyH=\dimexpr\textheight-\HeaderH\relax          % what is left under it
+  \SectionHeadH=0.03\textheight
+  \PlannerTabH=\dimexpr\textheight/\PlannerTabCount\relax   % tabs share the height equally
+  \PlannerTabInner=\dimexpr\PlannerTabH-2pt\relax}
+
+% ---------- Sizes the page templates set for themselves ----------
+% year page
+\newdimen\MiniColGap \newdimen\MiniCellW \newdimen\MiniRowGap \newdimen\MiniTitleH
+\newdimen\MiniMonthH \newdimen\MiniRowH \newdimen\MiniRowDepth
+% month page
+\newdimen\MonthCellW \newdimen\MonthCellH \newdimen\MonthHeadH
+% week page
+\newdimen\WeekGapH \newdimen\WeekLabelH \newdimen\WeekBlockH \newdimen\WeekLineH
+% day page
+\newdimen\ScheduleRowH \newdimen\TaskRowH \newdimen\TaskBoxSide
+% journal page
+\newdimen\JournalRowH
+
+% ---------- Right-edge tab strip ----------
+% document.tex.j2 sets the sizes below and defines \PlannerTabsDefinition as a list
+% of \Tab{key}{label}{target}. Each page records its active tab with \ActiveTab{key};
+% the strip is drawn once per page at shipout, so no page has to draw it.
+\newdimen\PlannerTabW \newdimen\PlannerTabTop
+\newdimen\PlannerTabH \newdimen\PlannerTabInner \newdimen\PlannerTabY
+\newcount\PlannerTabCount \PlannerTabCount=13
+\newcommand{\PlannerTabsDefinition}{}
+\def\PlannerActiveTab{}
+\newcommand{\ActiveTab}[1]{\def\PlannerActiveTab{#1}}
+
+\makeatletter
+% #1 key, #2 label, #3 link target. Draws one tab, then moves down one slot.
+\newcommand{\Tab}[3]{%
+  \ifdefstring{\PlannerActiveTab}{#1}%
+    {\def\tabfill{accent}\def\tabtext{white}}%
+    {\def\tabfill{tabidle}\def\tabtext{muted}}%
+  \put(\strip@pt\dimexpr\paperwidth-\PlannerTabW\relax,\strip@pt\PlannerTabY){%
+    \color{\tabfill}\rule[1pt]{\PlannerTabW}{\PlannerTabInner}}%
+  \put(\strip@pt\dimexpr\paperwidth-\PlannerTabW\relax,\strip@pt\PlannerTabY){%
+    \hyperlink{#3}{\makebox(\strip@pt\PlannerTabW,\strip@pt\PlannerTabH){%
+      \rotatebox{-90}{\fontsize{8}{10}\selectfont\bfseries\color{\tabtext}#2}}}}%
+  \advance\PlannerTabY by -\PlannerTabH\relax}
+
+\newcommand{\PlannerDrawTabs}{%
+  \begingroup
+  \unitlength=1pt
+  \PlannerTabY=\dimexpr\paperheight-\PlannerTabTop-\PlannerTabH\relax
+  \PlannerTabsDefinition
+  \endgroup}
+\makeatother
+\AddToShipoutPictureFG{\PlannerDrawTabs}
+
+% ---------- Page start and title strip ----------
+% #1 active tab key, #2 outline level, #3 outline title, #4 outline anchor name
+\newcommand{\BeginPage}[4]{\newpage\ActiveTab{#1}\pdfbookmark[#2]{#3}{#4}}
+
+% Title strip, exactly \HeaderH tall. #1 link anchor, #2 title, #3 links on the right.
+\newcommand{\PageHeader}[3]{%
+  \vbox to \HeaderH{%
+    \hbox to\linewidth{\hypertarget{#1}{}{\Large\bfseries\color{accent}\strut #2}\hskip 1em\hfil{\small\strut #3}}%
+    \vss}%
+  \nointerlineskip}
+
+% ---------- Rows and headings ----------
+% A writing row: label on the left, a thin rule underneath. #1 label, #2 height.
+\newcommand{\FormRow}[2]{%
+  \vbox to #2{\vfil\hbox to\linewidth{\strut #1\hfil}\kern2pt{\color{rule}\hrule height \RuleW}}%
+  \nointerlineskip}
+
+% A schedule slot: a rule across the top, the label just under it. #1 label, #2 height.
+\newcommand{\SlotRow}[2]{%
+  \vbox to #2{{\color{rule}\hrule height \RuleW}\kern1pt\hbox to\linewidth{\strut #1\hfil}\vss}%
+  \nointerlineskip}
+% The closing rule under the last slot or task row.
+\newcommand{\SlotEnd}{{\color{rule}\hrule height \RuleW}}
+
+% A heading, exactly \SectionHeadH tall.
+\newcommand{\SectionHead}[1]{%
+  \vbox to \SectionHeadH{%
+    \hbox to\linewidth{\fontsize{8.5}{10}\selectfont\bfseries\color{accent}\MakeUppercase{#1}\hfil}%
+    \vss}%
+  \nointerlineskip}
+
+\newcommand{\NumberLabel}[1]{{\color{muted}\footnotesize #1}}
+
+% A square tick box, \TaskBoxSide on a side.
+\newcommand{\TaskBox}{{\setlength{\fboxsep}{0pt}\setlength{\fboxrule}{0.6pt}%
+  \fcolorbox{muted}{white}{\rule{0pt}{\TaskBoxSide}\rule{\TaskBoxSide}{0pt}}}}
+% A task row: a rule across the top, the tick box centred between it and the next rule.
+\newcommand{\TaskRow}[1]{%
+  \vbox to #1{{\color{rule}\hrule height \RuleW}\vss\hbox to\linewidth{\hspace{3pt}\TaskBox\hfil}\vss}%
+  \nointerlineskip}
+
+% ---------- Cells of the year and month grids ----------
+% Year: every cell has the same height (\MiniRowH), so rows line up exactly.
+\newcommand{\MiniStrut}{\rule[-\MiniRowDepth]{0pt}{\MiniRowH}}
+\newcommand{\MiniHead}[1]{\makebox[\MiniCellW]{\color{muted}\MiniStrut #1}}
+\newcommand{\MiniBlank}{\makebox[\MiniCellW]{\MiniStrut}}
+\newcommand{\MiniDay}[2]{\hyperlink{day-#1}{\makebox[\MiniCellW]{\MiniStrut #2}}}
+
+% Month: each cell is a link covering its whole box. Blanks must have the same shape as
+% day cells (the \strut gives the \parbox its width and first-line height), or rows grow.
+\newcommand{\MonthHead}[1]{\parbox[c][\MonthHeadH][c]{\MonthCellW}{\centering\small\bfseries\color{accent}#1}}
+\newcommand{\MonthBlank}{\parbox[t][\MonthCellH][t]{\MonthCellW}{\small\strut}}
+\newcommand{\MonthCell}[2]{%
+  \hyperlink{day-#1}{\parbox[t][\MonthCellH][t]{\MonthCellW}{\small\strut\kern4pt #2}}}
+\newcommand{\MonthVRule}{{\color{rule}\vrule width \RuleW}}
+\newcommand{\MonthLine}{%
+  \hbox{\color{rule}\vrule height \RuleW depth 0pt width \dimexpr7\MonthCellW+8\RuleW\relax}%
+  \nointerlineskip}

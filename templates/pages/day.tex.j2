@@ -1,0 +1,33 @@
+%# One day: the hourly schedule on the left, the task list on the right.
+\BeginPage{\VAR{ day.month_id }}{1}{\VAR{ day.title }}{bm-day-\VAR{ day.id }}%
+\PageHeader{day-\VAR{ day.id }}{\VAR{ day.title }}{%
+\hyperlink{month-\VAR{ day.month_id }}{Month}\quad%
+\hyperlink{week-\VAR{ day.week_id }}{Week}\quad%
+\hyperlink{journal-\VAR{ day.id }}{Journal}\quad%
+%% if day.prev_id
+\hyperlink{day-\VAR{ day.prev_id }}{$\langle$\,Prev}%
+%% endif
+\quad%
+%% if day.next_id
+\hyperlink{day-\VAR{ day.next_id }}{Next\,$\rangle$}%
+%% endif
+}%
+%# Row heights: the page body split evenly, under the section heading.
+\ScheduleRowH=\dimexpr(\BodyH-\SectionHeadH)*99/100/\VAR{ hours|length }\relax
+\TaskRowH=\dimexpr(\BodyH-\SectionHeadH)*99/100/\VAR{ cfg.task_rows }\relax
+\TaskBoxSide=0.4\TaskRowH
+\noindent
+\begin{minipage}[t]{0.52\textwidth}
+\SectionHead{Schedule}%
+%% for hour in hours
+\SlotRow{\NumberLabel{\VAR{ hour }}}{\ScheduleRowH}%
+%% endfor
+\SlotEnd
+\end{minipage}\hfill
+\begin{minipage}[t]{0.44\textwidth}
+\SectionHead{Tasks}%
+%% for n in range(cfg.task_rows)
+\TaskRow{\TaskRowH}%
+%% endfor
+\SlotEnd
+\end{minipage}
